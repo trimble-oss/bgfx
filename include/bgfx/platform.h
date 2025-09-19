@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2024 Branimir Karadzic. All rights reserved.
+ * Copyright 2011-2025 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
  */
 
@@ -11,6 +11,8 @@
 // necessary to use this header in conjunction with creating windows.
 
 #include "bgfx.h"
+
+#if !BGFX_IDL_CPP
 
 namespace bgfx
 {
@@ -141,5 +143,7 @@ namespace bgfx
 	void* getVkImage(TextureHandle _handle);
 
 } // namespace bgfx
+
+#endif // BGFX_IDL_CPP
 
 #endif // BGFX_PLATFORM_H_HEADER_GUARD

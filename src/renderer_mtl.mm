@@ -47,7 +47,7 @@ namespace bgfx { namespace mtl
 		{ MTLPrimitiveTypeLineStrip,     2, 1, 1 },
 		{ MTLPrimitiveTypePoint,         1, 1, 0 },
 	};
-	BX_STATIC_ASSERT(Topology::Count == BX_COUNTOF(s_primInfo) );
+	static_assert(Topology::Count == BX_COUNTOF(s_primInfo) );
 
 	static const char* s_attribName[] =
 	{
@@ -70,7 +70,7 @@ namespace bgfx { namespace mtl
 		"a_texcoord6",
 		"a_texcoord7",
 	};
-	BX_STATIC_ASSERT(Attrib::Count == BX_COUNTOF(s_attribName) );
+	static_assert(Attrib::Count == BX_COUNTOF(s_attribName) );
 
 	static const char* s_instanceDataName[] =
 	{
@@ -80,7 +80,7 @@ namespace bgfx { namespace mtl
 		"i_data3",
 		"i_data4",
 	};
-	BX_STATIC_ASSERT(BGFX_CONFIG_MAX_INSTANCE_DATA_COUNT == BX_COUNTOF(s_instanceDataName) );
+	static_assert(BGFX_CONFIG_MAX_INSTANCE_DATA_COUNT == BX_COUNTOF(s_instanceDataName) );
 
 	static const MTLVertexFormat s_attribType[][4][2] = //type, count, normalized
 	{
@@ -125,7 +125,7 @@ namespace bgfx { namespace mtl
 			{ MTLVertexFormatFloat4, MTLVertexFormatFloat4 },
 		},
 	};
-	BX_STATIC_ASSERT(AttribType::Count == BX_COUNTOF(s_attribType) );
+	static_assert(AttribType::Count == BX_COUNTOF(s_attribType) );
 
 	static const MTLCullMode s_cullMode[] =
 	{
@@ -348,7 +348,7 @@ namespace bgfx { namespace mtl
 #undef $A
 	};
 	BX_PRAGMA_DIAGNOSTIC_POP();
-	BX_STATIC_ASSERT(TextureFormat::Count == BX_COUNTOF(s_textureFormat) );
+	static_assert(TextureFormat::Count == BX_COUNTOF(s_textureFormat) );
 
 	int32_t s_msaa[] =
 	{
@@ -425,7 +425,7 @@ static const char* s_accessNames[] = {
 	"Access::Write",
 	"Access::ReadWrite",
 };
-BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNames count");
+static_assert(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNames count");
 
 #ifndef __IPHONE_OS_VERSION_MAX_ALLOWED
 #	define __IPHONE_OS_VERSION_MAX_ALLOWED 0
@@ -498,7 +498,11 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 			BX_UNUSED(_init);
 			BX_TRACE("Init.");
 
-#define CHECK_FEATURE_AVAILABLE(feature, ...) if (@available(__VA_ARGS__)) { feature = true; } else { feature = false; }
+#define CHECK_FEATURE_AVAILABLE(feature, ...) \
+	BX_MACRO_BLOCK_BEGIN \
+		if (@available(__VA_ARGS__)) { feature = true; } else { feature = false; } \
+		BX_TRACE("[MTL] OS feature %s: %d", (#feature) + 2, feature); \
+	BX_MACRO_BLOCK_END
 
 			CHECK_FEATURE_AVAILABLE(m_usesMTLBindings, macOS 13.0, iOS 16.0, tvOS 16.0, macCatalyst 16.0, VISION_OS_MINIMUM *);
 			CHECK_FEATURE_AVAILABLE(m_hasCPUCacheModesAndStorageModes, iOS 9.0, macOS 10.11, macCatalyst 13.1, tvOS 9.0, VISION_OS_MINIMUM *);
@@ -1747,7 +1751,7 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 					break;
 				}
 
-				UniformType::Enum type;
+				uint8_t type;
 				uint16_t loc;
 				uint16_t num;
 				uint16_t copy;
@@ -1765,7 +1769,7 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 					data = (const char*)m_uniforms[handle.idx];
 				}
 
-				switch ( (uint32_t)type)
+				switch (type)
 				{
 				case UniformType::Mat3:
 				case UniformType::Mat3|kUniformFragmentBit:
@@ -2225,7 +2229,7 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 												}
 
 												UniformType::Enum type = convertMtlType(dataType);
-												constantBuffer->writeUniformHandle( (UniformType::Enum)(type|fragmentBit), uint32_t(uniform.offset), info->m_handle, uint16_t(num) );
+												constantBuffer->writeUniformHandle(type|fragmentBit, uint32_t(uniform.offset), info->m_handle, uint16_t(num) );
 												BX_TRACE("store %s %d offset:%d", name, info->m_handle, uint32_t(uniform.offset) );
 											}
 										}
@@ -3509,9 +3513,9 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 		else
 #endif // BX_PLATFORM_VISIONOS
 		{
-			if (m_metalLayer)
+			if (NULL != m_metalLayer)
 			{
-				release(m_metalLayer);
+				MTL_RELEASE(m_metalLayer);
 			}
 
 #if !BX_PLATFORM_VISIONOS
@@ -3672,6 +3676,7 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 		desc.mipmapLevelCount = 1;
 		desc.sampleCount = sampleCount;
 		desc.arrayLength = 1;
+		desc.swizzle = { MTLTextureSwizzleRed, MTLTextureSwizzleGreen, MTLTextureSwizzleBlue, MTLTextureSwizzleAlpha };
 
 		if (s_renderMtl->m_hasCPUCacheModesAndStorageModes)
 		{
@@ -3792,7 +3797,7 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 			if (m_drawable != NULL)
 			{
 				m_drawableTexture = m_drawable.texture;
-				retain(m_drawable); // keep alive to be useable at 'flip'
+				retain(m_drawable); // keep alive to be usable at 'flip'
 				retain(m_drawableTexture);
 			}
 			else
@@ -5141,7 +5146,7 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 										BGFX_FATAL(
 											  false
 											, Fatal::DebugCheck
-											, "Failed to set image with access: %s, format:%s is not supoort"
+											, "Failed to set image with access: %s, format:%s is not supported"
 											, s_accessNames[bind.m_access]
 											, bimg::getName(bimg::TextureFormat::Enum(bind.m_format) )
 											);
@@ -5444,7 +5449,6 @@ BX_STATIC_ASSERT(BX_COUNTOF(s_accessNames) == Access::Count, "Invalid s_accessNa
 				}
 
 				tvm.printf(10, pos++, 0x8b, "      Indices: %7d ", statsNumIndices);
-//				tvm.printf(10, pos++, 0x8b, " Uniform size: %7d, Max: %7d ", _render->m_uniformEnd, _render->m_uniformMax);
 				tvm.printf(10, pos++, 0x8b, "     DVB size: %7d ", _render->m_vboffset);
 				tvm.printf(10, pos++, 0x8b, "     DIB size: %7d ", _render->m_iboffset);
 

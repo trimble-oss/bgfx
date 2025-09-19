@@ -1,10 +1,12 @@
 /*
- * Copyright 2011-2024 Branimir Karadzic. All rights reserved.
+ * Copyright 2011-2025 Branimir Karadzic. All rights reserved.
  * License: https://github.com/bkaradzic/bgfx/blob/master/LICENSE
  */
 
 #ifndef BGFX_H_HEADER_GUARD
 #define BGFX_H_HEADER_GUARD
+
+#define BGFX_IDL_CPP 0
 
 #include <stdarg.h> // va_list
 #include <stdint.h> // uint32_t
@@ -348,7 +350,7 @@ namespace bgfx
 		enum Enum
 		{
 			TriListFlipWinding,  //!< Flip winding order of triangle list.
-			TriStripFlipWinding, //!< Flip winding order of trinagle strip.
+			TriStripFlipWinding, //!< Flip winding order of triangle strip.
 			TriListToLineList,   //!< Convert triangle list to line list.
 			TriStripToTriList,   //!< Convert triangle strip to triangle list.
 			LineStripToLineList, //!< Convert line strip to line list.
@@ -3242,6 +3244,7 @@ namespace bgfx
 	///      - `u_model mat4[BGFX_CONFIG_MAX_BONES]` - array of model matrices.
 	///      - `u_modelView mat4` - concatenated model view matrix, only first
 	///        model matrix from array is used.
+	//       - `u_invModelView mat4` - inverted model view matrix.
 	///      - `u_modelViewProj mat4` - concatenated model view projection matrix.
 	///      - `u_alphaRef float` - alpha reference value for alpha test.
 	///
