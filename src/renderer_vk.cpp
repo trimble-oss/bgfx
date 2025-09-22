@@ -7855,7 +7855,7 @@ VK_DESTROY
 				return false;
 
 			case VK_ERROR_OUT_OF_DATE_KHR:
-				m_needToRefreshSwapchain = true;
+				m_needToRecreateSwapchain = true;
 				return false;
 
 			case VK_SUBOPTIMAL_KHR:
@@ -7923,7 +7923,7 @@ VK_DESTROY
 				break;
 
 			case VK_ERROR_OUT_OF_DATE_KHR:
-				m_needToRefreshSwapchain = true;
+				 = true;
 				break;
 
 			case VK_SUBOPTIMAL_KHR:
