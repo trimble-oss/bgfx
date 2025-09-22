@@ -7923,7 +7923,7 @@ VK_DESTROY
 				break;
 
 			case VK_ERROR_OUT_OF_DATE_KHR:
-				 = true;
+				m_needToRecreateSwapchain = true;
 				break;
 
 			case VK_SUBOPTIMAL_KHR:
